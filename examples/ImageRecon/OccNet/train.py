@@ -35,7 +35,7 @@ Commandline arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-expid', type=str, default='Direct', help='Unique experiment identifier.')
 parser.add_argument('-device', type=str, default='cuda', help='Device to use')
-parser.add_argument('-categories', type=str,nargs='+', default=['chair'], help='list of object classes to use')
+parser.add_argument('-categories', type=str,nargs='+', default=['bench'], help='list of object classes to use')
 parser.add_argument('-epochs', type=int, default=500, help='Number of train epochs.')
 parser.add_argument('-lr', type=float, default=1e-4, help='Learning rate.')
 parser.add_argument('-val-every', type=int, default=5, help='Validation frequency (epochs).')
@@ -51,20 +51,20 @@ args = parser.parse_args()
 """
 Dataset
 """
-sdf_set = kal.dataloader.ShapeNet.SDF_Points(root= '../../datasets/', categories=args.categories, \
-	download=True, train = True, split = .7, num_points = 2024, occ = True)
-images_set = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True,  split = .7, views=23, transform= preprocess)
-train_set = kal.dataloader.ShapeNet.Combination([sdf_set, images_set], root='../../datasets/')
+sdf_set = kal.datasets.shapenet.ShapeNet_SDF_Points(root= '/home/maparia/kaolin-master/ShapeNetCore.v1/', cache_dir='cache/',  categories=args.categories,
+	train = True, split = .7, resolution = 100, num_points = 2024, occ = True)
+images_set = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories ,
+	train = True,  split = .7, views=23, transform= preprocess)
+train_set = kal.datasets.shapenet.ShapeNet_Combination([sdf_set, images_set])
 dataloader_train = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=8)
 
 
 
-sdf_set = kal.dataloader.ShapeNet.SDF_Points(root= '../../datasets/', categories=args.categories, \
-	download=True, train = False, split = .95, num_points = 100000, occ = True)
-images_set = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False,  split = .7, views=1, transform= preprocess)
-valid_set = kal.dataloader.ShapeNet.Combination([sdf_set, images_set], root='../../datasets/')
+sdf_set = kal.datasets.shapenet.ShapeNet_SDF_Points(root= '/home/maparia/kaolin-master/ShapeNetCore.v1/', cache_dir='cache/', categories=args.categories, 
+	train = False, split = .95, num_points = 100000, occ = True)
+images_set = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories , 
+	train = False,  split = .7, views=1, transform= preprocess)
+valid_set = kal.datasets.shapenet.ShapeNet_Combination([sdf_set, images_set])
 
 dataloader_val = DataLoader(valid_set, batch_size=5, shuffle=False, num_workers=8)
 
@@ -121,13 +121,13 @@ class Engine(object):
 		# Train loop
 		for i, data in enumerate(tqdm(dataloader_train), 0):
 			optimizer.zero_grad()
-			
+
 			###############################
 			####### data creation #########
-			###############################
-			imgs = data['imgs'][:,:3].to(args.device)
-			points = data['occ_points'].to(args.device)
-			gt_occ = data['occ_values'].to(args.device)
+			###############################	
+			imgs = data['data']['images'][:,:3].to(args.device)
+			points = data['data']['occ_points'].to(args.device)
+			gt_occ = data['data']['occ_values'].to(args.device)
 
 			###############################
 			########## inference ##########

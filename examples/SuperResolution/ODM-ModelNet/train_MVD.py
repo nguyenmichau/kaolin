@@ -52,12 +52,12 @@ args = parser.parse_args()
 """
 Dataset
 """
-train_set = ModelNet_ODMS(root ='../../datasets/',categories = args.categories, \
+train_set = ModelNet_ODMS(root ='/home/maparia/kaolin-master/ModelNet10/',categories = args.categories, \
 	download = True)
 dataloader_train = DataLoader(train_set, batch_size=args.batchsize, shuffle=True, 
 	num_workers=8)
 
-valid_set = ModelNet_ODMS(root ='../../datasets/',categories = args.categories, \
+valid_set = ModelNet_ODMS(root ='/home/maparia/kaolin-master/ModelNet10/',categories = args.categories, \
 	download = True, train = False)
 dataloader_val = DataLoader(valid_set, batch_size=args.batchsize, shuffle=False, \
 	num_workers=8)

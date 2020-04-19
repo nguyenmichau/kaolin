@@ -37,14 +37,14 @@ args = parser.parse_args()
 
 
 # Data
-points_set_valid = kal.dataloader.ShapeNet.Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False, split = .7, num_points=5000 )
-images_set_valid = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False,  split = .7, views=1, transform= preprocess )
-meshes_set_valid = kal.dataloader.ShapeNet.Meshes(root ='../../datasets/', categories =args.categories , \
-	download = True, train = False,  split = .7)
+points_set_valid = kal.datasets.shapenet.ShapeNet_Points(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/', cache_dir='cache/', categories =args.categories ,
+	train = False, split = .7, num_points=5000 )
+images_set_valid = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories ,
+	train = False,  split = .7, views=1, transform= preprocess )
+meshes_set_valid = kal.datasets.shapenet.ShapeNet_Meshes(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/', categories =args.categories ,
+	train = False,  split = .7)
 
-valid_set = kal.dataloader.ShapeNet.Combination([points_set_valid, images_set_valid], root='../../datasets/')
+valid_set = kal.datasets.shapenet.ShapeNet_Combination([points_set_valid, images_set_valid])
 dataloader_val = DataLoader(valid_set, batch_size=args.batchsize, shuffle=False, 
 	num_workers=8)
 # Model
@@ -68,8 +68,8 @@ model.eval()
 with torch.no_grad():
 	for data in tqdm(dataloader_val): 
 		# data creation
-		tgt_points = data['points'].to(args.device)
-		inp_images = data['imgs'].to(args.device)
+		tgt_points = data['data']['points'].to(args.device)
+		inp_images = data['data']['images'].to(args.device)
 
 		# inference 
 		delta_verts = model(inp_images)

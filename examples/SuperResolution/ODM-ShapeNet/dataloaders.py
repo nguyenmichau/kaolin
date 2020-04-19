@@ -38,10 +38,10 @@ class ShapeNet_ODMS(object):
 
 	"""
 
-	def __init__(self, root='../datasets/', train=True, download=True, compute=True, high=128, low=32, categories=['chair'], single_view=True, voxels = True, split = .7):
+	def __init__(self, root='/home/maparia/kaolin-master/ShapeNetRoot.v1/', train=True, download=True, compute=True, high=128, low=32, categories=['chair'], single_view=True, voxels = True, split = .7):
 		self.high = high
 		self.low = low
-		voxel_set = kal.dataloader.ShapeNet.Voxels( root, train=train, download=download, categories=categories, resolutions=[high,low], split = split)
+		voxel_set = kal.datasets.shapenet.ShapeNet_Voxels( root, train=train, cache_dir='cache/', categories=categories, resolutions=[high,low], split = split)
 		odm_location = root + '/ShapeNet/ODMs/'
 		self.load_voxels = voxels
 		if self.load_voxels :  

@@ -39,12 +39,12 @@ args = parser.parse_args()
 """
 Dataset
 """
-train_set = ShapeNet_ODMS(root ='../../datasets/',categories = args.categories,  \
+train_set = ShapeNet_ODMS(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories = args.categories,  \
 	download = True, high = 128, low = 32, split=.97, voxels = False)
 dataloader_train = DataLoader(train_set, batch_size=args.batchsize, shuffle=True, \
 	num_workers=8)
 
-valid_set = ShapeNet_ODMS(root ='../../datasets/',categories = args.categories, \
+valid_set = ShapeNet_ODMS(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories = args.categories, \
 	download = True, train = False, high = 128, low = 32, split=.97, voxels = True)
 dataloader_val = DataLoader(valid_set, batch_size=args.batchsize, shuffle=False, \
 	num_workers=8)

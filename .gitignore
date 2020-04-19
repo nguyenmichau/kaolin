@@ -198,3 +198,8 @@ examples/renderers/DIB-R/results/
 # example outputs
 cache/
 log/
+
+# maparia gitignore
+pytorch/
+tests/visualize/results/
+

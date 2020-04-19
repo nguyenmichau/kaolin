@@ -37,11 +37,11 @@ args = parser.parse_args()
 """
 Dataset
 """
-train_set = kal.dataloader.ModelNet(root ='../../datasets/',categories = args.categories, download = True)
+train_set = kal.datasets.modelnet.ModelNet(basedir ='/home/maparia/kaolin-master/ModelNet10/',categories = args.categories)
 dataloader_train = DataLoader(train_set, batch_size=args.batchsize, shuffle=True, 
 	num_workers=8)
 
-valid_set = kal.dataloader.ModelNet(root ='../../datasets/',categories = args.categories, download = True, train = False)
+valid_set = kal.datasets.modelnet.ModelNet(basedir ='/home/maparia/kaolin-master/ModelNet10/',categories = args.categories)
 dataloader_val = DataLoader(valid_set, batch_size=args.batchsize, shuffle=False, \
 	num_workers=8)
 

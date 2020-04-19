@@ -40,17 +40,17 @@ args = parser.parse_args()
 
 
 # Data
-images_set = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False,  split = .7, views=1)
-points_set_valid = kal.dataloader.ShapeNet.Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False, split = .7, num_points=5000 )
-sdf_set = kal.dataloader.ShapeNet.SDF_Points(root= '../../datasets/', categories=args.categories, \
-	download=True, train = False, split = .7, num_points = 100000, occ = True)
-data_set_mesh = kal.dataloader.ShapeNet.Meshes(root= '../../datasets/', \
-	categories=args.categories, download=True, train = False, split = .7)
+images_set = kal.datasets.shapenet.ShapeNet_Images(root ='home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories , cache_dir='cache/', 
+	train = False,  split = .7, views=1)
+points_set_valid = kal.datasets.shapenet.ShapeNet_Points(root ='home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories ,
+	train = False, split = .7, num_points=5000 )
+sdf_set = kal.datasets.shapenet.ShapeNet_SDF_Points(root= 'home/maparia/kaolin-master/ShapeNetCore.v1/', categories=args.categories,
+	train = False, split = .7, num_points = 100000, occ = True)
+data_set_mesh = kal.datasets.shapenet.ShapeNet_Meshes(root= 'home/maparia/kaolin-master/ShapeNetCore.v1/', 
+	categories=args.categories, train = False, split = .7)
 
 
-valid_set = kal.dataloader.ShapeNet.Combination([sdf_set, images_set, data_set_mesh, points_set_valid], root='../../datasets/')
+valid_set = kal.datasets.shapenet.ShapeNet_Combination([sdf_set, images_set, data_set_mesh, points_set_valid])
 
 dataloader_val = DataLoader(valid_set, batch_size=5, shuffle=False, num_workers=8, collate_fn=collate_fn)
 

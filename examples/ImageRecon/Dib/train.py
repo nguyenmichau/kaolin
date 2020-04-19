@@ -24,11 +24,13 @@ import sys
 from tqdm import tqdm
 
 from utils import preprocess, loss_lap, collate_fn, normalize_adj, loss_flat
-from graphics.render.base import Render as Dib_Renderer
-from graphics.utils.utils_perspective import  perspectiveprojectionnp
+from kaolin.graphics import DIBRenderer as Dib_Renderer
+from kaolin.graphics.dib_renderer.utils.perspective import perspectiveprojectionnp 
+
 from architectures import Encoder
 
-import kaolin as kal 
+import kaolin as kal
+
 
 
 """
@@ -52,21 +54,20 @@ args = parser.parse_args()
 """
 Dataset
 """
-sdf_set = kal.dataloader.ShapeNet.SDF_Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True, split = .7, num_points=3000 )
-point_set = kal.dataloader.ShapeNet.Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True, split = .7, num_points=3000 )
-images_set = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True,  split = .7, views=23, transform= preprocess )
-train_set = kal.dataloader.ShapeNet.Combination([sdf_set, images_set, point_set], root='../../kaolin/datasets/')
+sdf_set = kal.datasets.shapenet.ShapeNet_SDF_Points(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories, cache_dir='cache/', train = True, split = .7, num_points=3000 )
+point_set = kal.datasets.shapenet.ShapeNet_Points(root ='/home/maparia/kaolin-master/ShapeNetCore.v1',categories =args.categories , cache_dir='cache/',
+	train = True, split = .7, num_points=3000 )
+images_set = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1',categories =args.categories ,
+	train = True,  split = .7, views=23, transform= preprocess )
+train_set = kal.datasets.shapenet.ShapeNet_Combination([sdf_set, images_set, point_set])
 
 dataloader_train = DataLoader(train_set, batch_size=args.batchsize, shuffle=True, num_workers=8)
 
 
 
 
-images_set_valid = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False,  split = .7, views=1, transform= preprocess )
+images_set_valid = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1',categories =args.categories , 
+	train = False,  split = .7, views=1, transform= preprocess )
 dataloader_val = DataLoader(images_set_valid, batch_size=args.batchsize, shuffle=False, 
 	num_workers=8)
 
@@ -119,15 +120,15 @@ class Engine(object):
 		model.train()
 		# Train loop
 		for i, data in enumerate(tqdm(dataloader_train), 0):
-			optimizer.zero_grad()
-			
+			optimizer.zero_grad()		
+
 			# data creation
-			tgt_points = data['points'].cuda()
-			inp_images = data['imgs'].cuda()
+			tgt_points = data['data']['points'].cuda()
+			inp_images = data['data']['images'].cuda()
 			image_gt = inp_images.permute(0,2,3,1)[:,:,:,:3]
 			alhpa_gt = inp_images.permute(0,2,3,1)[:,:,:,3:]
-			cam_mat = data['cam_mat'].cuda()
-			cam_pos = data['cam_pos'].cuda()
+			cam_mat = data['data']['params']['cam_mat'].cuda()
+			cam_pos = data['data']['params']['cam_pos'].cuda()
 
 			# set viewing parameters 
 			renderer.camera_params = [cam_mat, cam_pos, cam_proj]
@@ -137,7 +138,10 @@ class Engine(object):
 			pred_verts = initial_verts + delta_verts
 		
 			# render image
-			image_pred, alpha_pred, face_norms = renderer.forward(points=[(pred_verts*.57), mesh.faces], colors=[colours])
+			points=[(pred_verts*.57), mesh.faces]			
+	
+			image_pred, alpha_pred, face_norms = renderer.forward([(pred_verts*.57), mesh.faces], [colours])
+			
 			
 			# colour loss
 			img_loss = ((image_pred - image_gt)**2).mean()

@@ -49,22 +49,22 @@ args = parser.parse_args()
 """
 Dataset
 """
-points_set = kal.dataloader.ShapeNet.Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True, split = .7, num_points=3000 )
-images_set = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = True,  split = .7, views=23, transform= preprocess )
-train_set = kal.dataloader.ShapeNet.Combination([points_set, images_set], root='../../datasets/')
+points_set = kal.datasets.shapenet.ShapeNet_Points(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/', cache_dir='cache/', categories =args.categories ,
+	 train = True, split = .7, num_points=3000 )
+images_set = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories ,
+	 train = True,  split = .7, views=23, transform= preprocess )
+train_set = kal.datasets.shapenet.ShapeNet_Combination([points_set, images_set])
 
 dataloader_train = DataLoader(train_set, batch_size=args.batchsize, shuffle=True, 
 	num_workers=8)
 
 
 
-points_set_valid = kal.dataloader.ShapeNet.Points(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False, split = .7, num_points=5000 )
-images_set_valid = kal.dataloader.ShapeNet.Images(root ='../../datasets/',categories =args.categories , \
-	download = True, train = False,  split = .7, views=1, transform= preprocess )
-valid_set = kal.dataloader.ShapeNet.Combination([points_set_valid, images_set_valid], root='../../datasets/')
+points_set_valid = kal.datasets.shapenet.ShapeNet_Points(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/', cache_dir='cache/', categories =args.categories , 
+	train = False, split = .7, num_points=5000 )
+images_set_valid = kal.datasets.shapenet.ShapeNet_Images(root ='/home/maparia/kaolin-master/ShapeNetCore.v1/',categories =args.categories ,
+	train = False,  split = .7, views=1, transform= preprocess )
+valid_set = kal.datasets.shapenet.ShapeNet_Combination([points_set_valid, images_set_valid])
 
 dataloader_val = DataLoader(valid_set, batch_size=args.batchsize, shuffle=False, 
 	num_workers=8)
@@ -126,8 +126,8 @@ class Engine(object):
 			optimizer.zero_grad()
 			
 			# data creation
-			tgt_points = data['points'].to(args.device)
-			inp_images = data['imgs'].to(args.device)
+			tgt_points = data['data']['points'].to(args.device)
+			inp_images = data['data']['images'].to(args.device)
 
 			# inference 
 			delta_verts = model(inp_images)
@@ -171,8 +171,8 @@ class Engine(object):
 			for i, data in enumerate(tqdm(dataloader_val), 0):
 
 				# data creation
-				tgt_points = data['points'].to(args.device)
-				inp_images = data['imgs'].to(args.device)
+				tgt_points = data['data']['points'].to(args.device)
+				inp_images = data['data']['images'].to(args.device)
 
 				# inference 
 				delta_verts = model(inp_images)
